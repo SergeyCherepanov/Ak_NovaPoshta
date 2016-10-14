@@ -1,29 +1,28 @@
 <?php
-/** @var Ak_NovaPoshta_Block_Checkout_Shipping_Destination $this */
+/** @var Ak_Intime_Block_Checkout_Shipping_Destination $this */
 $cityId      = $this->getCityId();
 $warehouse   = $this->getWarehouse();
 $warehouseId = $warehouse ? $warehouse->getId() : false;
 ?>
-<ul id="novaposhta-form" class="form-list address-form-list" style="margin-top: 20px">
-    <li id="novaposhta-form-city-container" class="fields">
+<ul id="intime-form" class="form-list address-form-list" style="margin-top: 20px">
+    <li id="intime-form-city-container" class="fields">
         <label><?php echo $this->__('Please choose city');?>:</label>
         <div class="input-box">
-            <select class="validate-select" id="novaposhta-form-city-field" name="novaposhta_city">
+            <select class="validate-select" id="intime-form-city-field" name="intime_city">
                 <option value=""></option>
-                <?php foreach ($this->getCities() as $city): /** @var Ak_NovaPoshta_Model_City $city */ ?>
+                <?php foreach ($this->getCities() as $city): /** @var Ak_intime_Model_City $city */ ?>
                     <option <?php echo $city->getId() == $cityId ? 'selected="selected"' : ''?> value="<?php echo $city->getId();?>"><?php echo $city->getData('name_ru');?></option>
                 <?php endforeach;?>
             </select>
         </div>
     </li>
     <?php if ($warehouses = $this->getWarehouses()): ?>
-        <li id="novaposhta-form-warehouse-container" class="fields">
+        <li id="intime-form-warehouse-container" class="fields">
             <label><?php echo $this->__('Please choose warehouse');?>:</label>
             <div class="input-box">
-                <!--<select class="validate-select" id="novaposhta-form-warehouse-field" name="novaposhta_warehouse">-->
-                <select id="novaposhta-form-warehouse-field" name="novaposhta_warehouse">
+                <select class="validate-select" id="intime-form-warehouse-field" name="intime_warehouse">
                     <option value=""></option>
-                    <?php foreach ($warehouses as $warehouse): /** @var Ak_NovaPoshta_Model_Warehouse $warehouse */ ?>
+                    <?php foreach ($warehouses as $warehouse): /** @var Ak_intime_Model_Warehouse $warehouse */ ?>
                         <option <?php echo $warehouse->getId() == $warehouseId ? 'selected="selected"' : ''?> value="<?php echo $warehouse->getId();?>"><?php echo $warehouse->getData('address_ru');?></option>
                     <?php endforeach;?>
                 </select>
@@ -31,10 +30,10 @@ $warehouseId = $warehouse ? $warehouse->getId() : false;
         </li>
     <?php endif;?>
     <?php if($this->canShowStreet()):?>
-        <li id="novaposhta-form-street-container" class="fields">
+        <li id="intime-form-street-container" class="fields">
             <label><?php echo $this->__('Please specify street');?>:</label>
             <div class="input-box">
-                <input name="novaposhta_street" type="text" class="input-text required-entry" value="<?php echo $this->getStreet()?>" />
+                <input name="intime_street" type="text" class="input-text required-entry" value="<?php echo $this->getStreet()?>" />
             </div>
         </li>
     <?php endif;?>

@@ -8,8 +8,8 @@
                 self.onShippingChange();
             });
             this.bind('click', /^s_method.+$/i, this.onShippingChange);
-            this.bind('change', /^novaposhta-form-city-field$/i, this.onChangeCity);
-            this.bind('change', /^novaposhta-form-warehouse-field$/i, this.onChangeWarehouse);
+            this.bind('change', /^intime-form-city-field$/i, this.onChangeCity);
+            this.bind('change', /^intime-form-warehouse-field$/i, this.onChangeWarehouse);
             this.onShippingChange();
 
         },
@@ -28,7 +28,7 @@
         onShippingChange: function(el, event) {
             var hideForm = true;
             $$('.shipping-method input[type=radio]').each(function(el){
-                if (el.id.match(/^s_method_novaposhta/) && el.checked) {
+                if (el.id.match(/^s_method_intime/) && el.checked) {
                     hideForm = false;
                     this.method = el.value;
                     this.showForm(Element.up(el, 'li'));
@@ -40,7 +40,7 @@
         },
         showForm: function(formContainer, method) {
             this.showLoading(formContainer);
-            new Ajax.Request('<?php echo $this->getUrl('novaposhta/checkout/form')?>', {
+            new Ajax.Request('<?php echo $this->getUrl('intime/checkout/form')?>', {
                 parameters: {method: this.method},
                 onSuccess: function(response) {
                     this.hideLoading();
@@ -49,14 +49,14 @@
             });
         },
         hideForm: function () {
-            if ($('novaposhta-form')) {
-                Element.remove('novaposhta-form');
+            if ($('intime-form')) {
+                Element.remove('intime-form');
             }
         },
         onChangeCity: function(el) {
             this.showLoading();
             el.disabled = true;
-            new Ajax.Request('<?php echo $this->getUrl('novaposhta/checkout/form')?>', {
+            new Ajax.Request('<?php echo $this->getUrl('intime/checkout/form')?>', {
                 parameters: {city: el.value, method: this.method},
                 onSuccess: function(response) {
                     this.hideLoading();
@@ -67,7 +67,7 @@
         },
         onChangeWarehouse: function(el) {
 //            this.showLoading();
-//            new Ajax.Request('<?php //echo $this->getUrl('novaposhta/checkout/calculate')?>//', {
+//            new Ajax.Request('<?php //echo $this->getUrl('intime/checkout/calculate')?>//', {
 //                parameters: {warehouse:el.value},
 //                onSuccess: function(response) {
 //                    var result = eval('('+response.responseText+')');
@@ -77,7 +77,7 @@
 //            });
         },
         updateForm: function(html, formContainer) {
-            var currentForm = $('novaposhta-form');
+            var currentForm = $('intime-form');
             if (!formContainer && currentForm) {
                 formContainer = currentForm.parentNode;
             }
@@ -88,13 +88,13 @@
                 currentForm.parentNode.removeChild(currentForm);
             }
             Element.insert(formContainer, html);
-            jQuery($('novaposhta-form')).find('select').uniform({
+            jQuery($('intime-form')).find('select').uniform({
                 selectAutoWidth : false
             });
         },
         showLoading: function(formContainer) {
             if (!formContainer) {
-                var currentForm = $('novaposhta-form');
+                var currentForm = $('intime-form');
                 if (currentForm) {
                     formContainer = currentForm.parentNode;
                 }
@@ -103,23 +103,23 @@
                 return;
             }
 
-            var dateAndCost = $('novaposhta-delivery-date-cost');
+            var dateAndCost = $('intime-delivery-date-cost');
             if (dateAndCost) {
                 dateAndCost.parentNode.removeChild(dateAndCost);
             }
 
-            Element.insert(formContainer, '<p style="display: block;margin: 10px 0" id="novaposhta-loading"><img style="display: inline;vertical-align: middle" height="24" src="'+this.loadingImageUrl+'" alt="" /> <span style="display: inline"><?php echo $this->__('Loading, please wait...');?></span></p>');
+            Element.insert(formContainer, '<p style="display: block;margin: 10px 0" id="intime-loading"><img style="display: inline;vertical-align: middle" height="24" src="'+this.loadingImageUrl+'" alt="" /> <span style="display: inline"><?php echo $this->__('Loading, please wait...');?></span></p>');
         },
         hideLoading: function() {
-            Element.remove('novaposhta-loading');
+            Element.remove('intime-loading');
         },
         showDeliveryDateAndCost: function(date, cost) {
-            var formContainer = $('novaposhta-form').parentNode;
+            var formContainer = $('intime-form').parentNode;
             checkout.shippingChangedEvent();
             if (date) {
-                Element.insert(formContainer, '<div id="novaposhta-delivery-date-cost"><p><span id="novaposhta-delivery-date"><span><?php echo $this->__('Delivery Date')?>:</span> <strong>'+date+'</strong></span></p><p><span id="novaposhta-delivery-cost"><span><?php echo $this->__('Shipping Price')?>:</span> <strong>'+cost+'</strong></span></p></div>');
+                Element.insert(formContainer, '<div id="intime-delivery-date-cost"><p><span id="intime-delivery-date"><span><?php echo $this->__('Delivery Date')?>:</span> <strong>'+date+'</strong></span></p><p><span id="intime-delivery-cost"><span><?php echo $this->__('Shipping Price')?>:</span> <strong>'+cost+'</strong></span></p></div>');
             } else {
-                Element.insert(formContainer, '<div id="novaposhta-delivery-date-cost"><p><span id="novaposhta-delivery-cost"><span><?php echo $this->__('Shipping Price')?>:</span> <strong>'+cost+'</strong></span></p></div>');
+                Element.insert(formContainer, '<div id="intime-delivery-date-cost"><p><span id="intime-delivery-cost"><span><?php echo $this->__('Shipping Price')?>:</span> <strong>'+cost+'</strong></span></p></div>');
             }
 
         }

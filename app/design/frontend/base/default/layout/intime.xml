@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<layout version="1.0.0.0">
+    <intime_checkout_form>
+        <block type="intime/checkout_shipping_destination" name="root" output="toHtml" template="intime/checkout/shipping/destination.phtml"/>
+    </intime_checkout_form>
+</layout>
