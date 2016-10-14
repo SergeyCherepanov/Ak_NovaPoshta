@@ -1,10 +1,10 @@
 <?php
-class Ak_NovaPoshta_Model_Carrier_NovaPoshta
+class Ak_Intime_Model_Carrier_Intime
     extends Mage_Shipping_Model_Carrier_Abstract
     implements Mage_Shipping_Model_Carrier_Interface
 {
 
-    protected $_code = 'novaposhta';
+    protected $_code = 'intime';
 
     /**
      * @param Mage_Shipping_Model_Rate_Request $request
@@ -13,7 +13,7 @@ class Ak_NovaPoshta_Model_Carrier_NovaPoshta
      */
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {
-        if (!$this->getConfigFlag('active') || !Mage::helper('novaposhta')->getStoreConfig('sender_city')) {
+        if (!$this->getConfigFlag('active') || !Mage::helper('intime')->getStoreConfig('sender_city')) {
             return false;
         }
 
@@ -29,7 +29,7 @@ class Ak_NovaPoshta_Model_Carrier_NovaPoshta
 //            $warehouseId = $quote->getShippingAddress()->getData('warehouse_id');
 
 //            if ($warehouseId) {
-//                $shippingPrice = Mage::helper('novaposhta')->getShippingCost($warehouseId, false);
+//                $shippingPrice = Mage::helper('intime')->getShippingCost($warehouseId, false);
 //                $shippingPrice = 0;
 //            }
 
@@ -37,8 +37,8 @@ class Ak_NovaPoshta_Model_Carrier_NovaPoshta
             $method = Mage::getModel('shipping/rate_result_method');
             $method->setCarrier($this->_code)
                 ->setCarrierTitle($this->getConfigData('name'))
-                ->setMethod('type_' . Ak_NovaPoshta_Model_Api_Client::DELIVERY_TYPE_WAREHOUSE_WAREHOUSE)
-                ->setMethodTitle('Новая Почта, Склад-Склад')
+                ->setMethod('type_' . Ak_Intime_Model_Api_Client::DELIVERY_TYPE_WAREHOUSE_WAREHOUSE)
+                ->setMethodTitle('Ин-тайм, Склад-Склад')
                 ->setPrice($shippingPrice)
                 ->setCost($shippingPrice);
 
@@ -48,8 +48,8 @@ class Ak_NovaPoshta_Model_Carrier_NovaPoshta
             $method = Mage::getModel('shipping/rate_result_method');
             $method->setCarrier($this->_code)
                 ->setCarrierTitle($this->getConfigData('name'))
-                ->setMethod('type_' . Ak_NovaPoshta_Model_Api_Client::DELIVERY_TYPE_WAREHOUSE_APARTMENT)
-                ->setMethodTitle('Новая Почта, Склад-Адрес')
+                ->setMethod('type_' . Ak_Intime_Model_Api_Client::DELIVERY_TYPE_WAREHOUSE_APARTMENT)
+                ->setMethodTitle('Ин-тайм, Склад-Адрес')
                 ->setPrice($shippingPrice)
                 ->setCost($shippingPrice);
 

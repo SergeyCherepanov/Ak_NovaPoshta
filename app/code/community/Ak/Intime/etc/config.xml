@@ -1,145 +1,145 @@
 <?xml version="1.0"?>
 <config>
     <modules>
-        <Ak_NovaPoshta>
+        <Ak_Intime>
             <version>0.2.4</version>
-        </Ak_NovaPoshta>
+        </Ak_Intime>
     </modules>
     <global>
         <models>
-            <novaposhta>
-                <class>Ak_NovaPoshta_Model</class>
-                <resourceModel>novaposhta_resource</resourceModel>
-            </novaposhta>
-            <novaposhta_resource>
-                <class>Ak_NovaPoshta_Model_Resource</class>
+            <intime>
+                <class>Ak_Intime_Model</class>
+                <resourceModel>intime_resource</resourceModel>
+            </intime>
+            <intime_resource>
+                <class>Ak_Intime_Model_Resource</class>
                 <entities>
                     <city>
-                        <table>novaposhta_city</table>
+                        <table>intime_city</table>
                     </city>
                     <warehouse>
-                        <table>novaposhta_warehouse</table>
+                        <table>intime_warehouse</table>
                     </warehouse>
-                    <novaposhta_quote_address>
-                        <table>novaposhta_quote_address</table>
-                    </novaposhta_quote_address>
-                    <novaposhta_order_address>
-                        <table>novaposhta_order_address</table>
-                    </novaposhta_order_address>
+                    <intime_quote_address>
+                        <table>intime_quote_address</table>
+                    </intime_quote_address>
+                    <intime_order_address>
+                        <table>intime_order_address</table>
+                    </intime_order_address>
                 </entities>
-            </novaposhta_resource>
+            </intime_resource>
         </models>
         <blocks>
-            <novaposhta>
-                <class>Ak_NovaPoshta_Block</class>
-            </novaposhta>
+            <intime>
+                <class>Ak_Intime_Block</class>
+            </intime>
         </blocks>
         <helpers>
-            <novaposhta>
-                <class>Ak_NovaPoshta_Helper</class>
-            </novaposhta>
+            <intime>
+                <class>Ak_Intime_Helper</class>
+            </intime>
         </helpers>
         <resources>
-            <novaposhta_setup>
+            <intime_setup>
                 <setup>
-                    <module>Ak_NovaPoshta</module>
+                    <module>Ak_Intime</module>
                 </setup>
-            </novaposhta_setup>
+            </intime_setup>
         </resources>
         <events>
             <sales_quote_address_collection_load_after>
                 <observers>
-                    <novaposhta_load_addres_collection_data>
+                    <intime_load_addres_collection_data>
                         <type>singleton</type>
-                        <class>novaposhta/observer</class>
+                        <class>intime/observer</class>
                         <method>loadQuoteAddressCollectionData</method>
-                    </novaposhta_load_addres_collection_data>
+                    </intime_load_addres_collection_data>
                 </observers>
             </sales_quote_address_collection_load_after>
             <sales_quote_address_save_after>
                 <observers>
-                    <novaposhta_save_addres_data>
+                    <intime_save_addres_data>
                         <type>singleton</type>
-                        <class>novaposhta/observer</class>
+                        <class>intime/observer</class>
                         <method>saveQuoteAddressData</method>
-                    </novaposhta_save_addres_data>
+                    </intime_save_addres_data>
                 </observers>
             </sales_quote_address_save_after>
             <sales_quote_address_load_after>
                 <observers>
-                    <novaposhta_load_addres_data>
+                    <intime_load_addres_data>
                         <type>singleton</type>
-                        <class>novaposhta/observer</class>
+                        <class>intime/observer</class>
                         <method>loadQuoteAddressData</method>
-                    </novaposhta_load_addres_data>
+                    </intime_load_addres_data>
                 </observers>
             </sales_quote_address_load_after>
             <sales_order_address_collection_load_after>
                 <observers>
-                    <novaposhta_load_addres_collection_data>
+                    <intime_load_addres_collection_data>
                         <type>singleton</type>
-                        <class>novaposhta/observer</class>
+                        <class>intime/observer</class>
                         <method>loadOrderAddressCollectionData</method>
-                    </novaposhta_load_addres_collection_data>
+                    </intime_load_addres_collection_data>
                 </observers>
             </sales_order_address_collection_load_after>
             <sales_order_address_save_after>
                 <observers>
-                    <novaposhta_save_addres_data>
+                    <intime_save_addres_data>
                         <type>singleton</type>
-                        <class>novaposhta/observer</class>
+                        <class>intime/observer</class>
                         <method>saveOrderAddressData</method>
-                    </novaposhta_save_addres_data>
+                    </intime_save_addres_data>
                 </observers>
             </sales_order_address_save_after>
             <sales_order_address_load_after>
                 <observers>
-                    <novaposhta_load_addres_data>
+                    <intime_load_addres_data>
                         <type>singleton</type>
-                        <class>novaposhta/observer</class>
+                        <class>intime/observer</class>
                         <method>loadOrderAddressData</method>
-                    </novaposhta_load_addres_data>
+                    </intime_load_addres_data>
                 </observers>
             </sales_order_address_load_after>
             <sales_order_save_after>
                 <observers>
-                    <novaposhta_save_order_data>
+                    <intime_save_order_data>
                         <type>singleton</type>
-                        <class>novaposhta/observer</class>
+                        <class>intime/observer</class>
                         <method>saveOrderData</method>
-                    </novaposhta_save_order_data>
+                    </intime_save_order_data>
                 </observers>
             </sales_order_save_after>
             <controller_action_predispatch_checkout_onepage_saveShippingMethod>
                 <observers>
-                    <novaposhta_load_addres_data>
+                    <intime_load_addres_data>
                         <type>singleton</type>
-                        <class>novaposhta/observer</class>
+                        <class>intime/observer</class>
                         <method>saveShippingMethodBefore</method>
-                    </novaposhta_load_addres_data>
+                    </intime_load_addres_data>
                 </observers>
             </controller_action_predispatch_checkout_onepage_saveShippingMethod>
             <controller_action_predispatch_ecommerceteam_easycheckout_index_saveShippingMethod>
                 <observers>
-                    <novaposhta_load_addres_data>
+                    <intime_load_addres_data>
                         <type>singleton</type>
-                        <class>novaposhta/observer</class>
+                        <class>intime/observer</class>
                         <method>saveShippingMethodBefore</method>
-                    </novaposhta_load_addres_data>
+                    </intime_load_addres_data>
                 </observers>
             </controller_action_predispatch_ecommerceteam_easycheckout_index_saveShippingMethod>
         </events>
         <fieldsets>
             <sales_convert_quote_address>
-                <novaposhta_warehouse_id>
+                <intime_warehouse_id>
                     <to_order_address>*</to_order_address>
-                </novaposhta_warehouse_id>
-                <novaposhta_warehouse_label>
+                </intime_warehouse_id>
+                <intime_warehouse_label>
                     <to_order_address>*</to_order_address>
-                </novaposhta_warehouse_label>
-                <novaposhta_novaposhta_street>
+                </intime_warehouse_label>
+                <intime_intime_street>
                     <to_order_address>*</to_order_address>
-                </novaposhta_novaposhta_street>
+                </intime_intime_street>
             </sales_convert_quote_address>
         </fieldsets>
     </global>
@@ -148,7 +148,7 @@
             <adminhtml>
                 <args>
                     <modules>
-                        <Ak_NovaPoshta_Adminhtml before="Mage_Adminhtml">Ak_NovaPoshta_Adminhtml</Ak_NovaPoshta_Adminhtml>
+                        <Ak_Intime_Adminhtml before="Mage_Adminhtml">Ak_Intime_Adminhtml</Ak_Intime_Adminhtml>
                     </modules>
                 </args>
             </adminhtml>
@@ -156,40 +156,40 @@
     </admin>
     <crontab>
         <jobs>
-            <novaposhta_import_city_and_warehouse>
+            <intime_import_city_and_warehouse>
                 <schedule>
-                    <cron_expr>0 0 * * *</cron_expr>
+                    <cron_expr>1 2 * * *</cron_expr>
                 </schedule>
                 <run>
-                    <model>ak_novaposhta/import::run</model>
+                    <model>ak_intime/import::run</model>
                 </run>
-            </novaposhta_import_city_and_warehouse>
+            </intime_import_city_and_warehouse>
         </jobs>
     </crontab>
     <frontend>
         <routers>
-            <novaposhta>
+            <intime>
                 <use>standard</use>
                 <args>
-                    <module>Ak_NovaPoshta</module>
-                    <frontName>novaposhta</frontName>
+                    <module>Ak_Intime</module>
+                    <frontName>intime</frontName>
                 </args>
-            </novaposhta>
+            </intime>
         </routers>
         <secure_url>
-            <novaposhta_checkout>/novaposhta/checkout</novaposhta_checkout>
+            <intime_checkout>/intime/checkout</intime_checkout>
         </secure_url>
         <layout>
             <updates>
-                <novaposhta>
-                    <file>novaposhta.xml</file>
-                </novaposhta>
+                <intime>
+                    <file>intime.xml</file>
+                </intime>
             </updates>
         </layout>
     </frontend>
     <default>
         <carriers>
-            <novaposhta>
+            <intime>
                 <!-- disabled by default not to propose unconfigured shipping method to customer -->
                 <active>0</active>
                 <!-- allow only for specific countries flag -->
@@ -197,15 +197,15 @@
                 <!-- allow only for Ukraine -->
                 <specificcountry>UA</specificcountry>
                 <!-- carrier model -->
-                <model>novaposhta/carrier_novaPoshta</model>
+                <model>intime/carrier_intime</model>
                 <!-- carrier title -->
                 <title>Новая Почта</title>
                 <!-- error message -->
                 <specificerrmsg>Этот способ доставки на текущий момент не доступен. Если вы желаете, чтобы мы доставили заказ Новой Почтой, обратитесь к менеджеру интернет-магазина.</specificerrmsg>
-                <api_url>http://orders.novaposhta.ua/xml.php</api_url>
+                <api_url>http://orders.intime.ua/xml.php</api_url>
                 <enable_log>0</enable_log>
                 <shipping_offset>1</shipping_offset>
-            </novaposhta>
+            </intime>
         </carriers>
     </default>
 </config>

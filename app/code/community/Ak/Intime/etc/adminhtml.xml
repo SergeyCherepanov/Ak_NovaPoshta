@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<config>
+    <menu>
+         <sales>
+            <children>
+                <intime translate="title" module="intime">
+                    <sort_order>210</sort_order>
+                    <title>Intime</title>
+                    <children>
+                        <intime translate="title" module="intime">
+                            <sort_order>10</sort_order>
+                            <title>Warehouses</title>
+                            <action>adminhtml/intime_warehouses/</action>
+                        </intime>
+                    </children>
+                </intime>
+            </children>
+         </sales>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <sales>
+                        <children>
+                            <intime translate="title" module="intime">
+                                <title>Intime</title>
+                                <sort_order>200</sort_order>
+                                <children>
+                                    <warehouses translate="title" module="intime">
+                                        <sort_order>10</sort_order>
+                                        <title>Warehouses</title>
+                                    </warehouses>
+                                </children>
+                            </intime>
+                        </children>
+                    </sales>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

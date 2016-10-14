@@ -1,22 +1,22 @@
 <?php
-class Ak_NovaPoshta_Helper_Data extends Mage_Core_Helper_Data
+class Ak_Intime_Helper_Data extends Mage_Core_Helper_Data
 {
-    protected $_logFile = 'novaposhta.log';
-    /** @var  Ak_NovaPoshta_Model_Resource_City */
+    protected $_logFile = 'intime.log';
+    /** @var  Ak_Intime_Model_Resource_City */
     protected $_senderCity;
 
     /**
-     * @return Ak_NovaPoshta_Model_Api_Client
+     * @return Ak_Intime_Model_Api_Client
      */
     public function getApi()
     {
-        return Mage::getSingleton('novaposhta/api_client');
+        return Mage::getSingleton('intime/api_client');
     }
 
     /**
      * @param $string
      *
-     * @return Ak_NovaPoshta_Helper_Data
+     * @return Ak_Intime_Helper_Data
      */
     public function log($string)
     {
@@ -34,16 +34,16 @@ class Ak_NovaPoshta_Helper_Data extends Mage_Core_Helper_Data
      */
     public function getStoreConfig($key, $storeId = null)
     {
-        return Mage::getStoreConfig("carriers/novaposhta/$key", $storeId);
+        return Mage::getStoreConfig("carriers/intime/$key", $storeId);
     }
 
     /**
-     * @return Ak_NovaPoshta_Model_City
+     * @return Ak_Intime_Model_City
      */
     public function getSenderCity()
     {
         if (is_null($this->_senderCity)) {
-            $this->_senderCity = Mage::getModel('novaposhta/city');
+            $this->_senderCity = Mage::getModel('intime/city');
             $this->_senderCity->load($this->getStoreConfig('sender_city'));
             if (!$this->_senderCity->getId()) {
                 Mage::throwException($this->__('Store city not defined.'));
@@ -108,7 +108,7 @@ class Ak_NovaPoshta_Helper_Data extends Mage_Core_Helper_Data
     {
         /** @var Mage_Sales_Model_Quote $quote */
         $quote                = Mage::getSingleton('checkout/session')->getQuote();
-        $destinationWarehouse = Mage::getModel('novaposhta/warehouse')->load($destinationWarehouseId);
+        $destinationWarehouse = Mage::getModel('intime/warehouse')->load($destinationWarehouseId);
         $senderCity           = $this->getSenderCity();
         $destinationCity      = $destinationWarehouse->getCity();
         $deliveryDate         = $this->getDeliveryDate();

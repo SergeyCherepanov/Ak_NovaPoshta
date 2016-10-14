@@ -1,5 +1,5 @@
 <?php
-class Ak_NovaPoshta_CheckoutController
+class Ak_Intime_CheckoutController
     extends Mage_Core_Controller_Front_Action
 {
     /**

@@ -1,154 +1,148 @@
 <?php
 class Ak_NovaPoshta_Model_Api_Client
 {
-    protected $_httpClient;
+    protected $_client;
 
-    const DELIVERY_TYPE_APARTMENT_APARTMENT = 1;
-    const DELIVERY_TYPE_APARTMENT_WAREHOUSE = 2;
-    const DELIVERY_TYPE_WAREHOUSE_APARTMENT = 3;
-    const DELIVERY_TYPE_WAREHOUSE_WAREHOUSE = 4;
+    const DELIVERY_TYPE_APARTMENT_APARTMENT = "DoorsDoors";
+    const DELIVERY_TYPE_APARTMENT_WAREHOUSE = "DoorsWarehouse";
+    const DELIVERY_TYPE_WAREHOUSE_APARTMENT = "WarehouseDoors";
+    const DELIVERY_TYPE_WAREHOUSE_WAREHOUSE = "WarehouseWarehouse";
 
     const LOAD_TYPE_STANDARD   = 1;
     const LOAD_TYPE_SECURITIES = 4;
 
     /**
      * @return string
-     */
-    protected function _getApiUri()
-    {
-        return Mage::helper('novaposhta')->getStoreConfig('api_url');
-    }
-
-    /**
-     * @return string
+     * @throws Exception
      */
     protected function _getApiKey()
     {
-        return Mage::helper('novaposhta')->getStoreConfig('api_key');
+        $key = Mage::helper('novaposhta')->getStoreConfig('api_key');
+        if (!trim($key)) {
+            Mage::helper('novaposhta')->log('No API key configured');
+            throw new Exception('No API key configured');
+        }
+
+        return $key;
     }
 
     /**
-     * @return Zend_Http_Client
+     * @return NovaPoshta_Api2
      */
-    protected function _getHttpClient()
+    protected function _getClient()
     {
-        if (!$this->_httpClient) {
-            $this->_httpClient = new Zend_Http_Client($this->_getApiUri());
+        if (!$this->_client) {
+            $this->_client = new NovaPoshta_Api2(
+                $this->_getApiKey(),
+                'ru', // Язык возвращаемых данных: ru (default) | ua | en
+                FALSE, // При ошибке в запросе выбрасывать Exception: FALSE (default) | TRUE
+                'curl' // Используемый механизм запроса: curl (defalut) | file_get_content
+            );
         }
 
-        return $this->_httpClient;
+        return $this->_client;
     }
 
     /**
-     * @param array $array
-     * @param SimpleXMLElement $element
-     * @return SimpleXMLElement
-     */
-    protected function _buildXml(array $array, SimpleXMLElement $element = null)
-    {
-        if (is_null($element)) {
-            $element = new SimpleXMLElement('<file/>');
-            $element->addChild('auth', $this->_getApiKey());
-        }
-
-        foreach ($array as $key => $value) {
-            if (!is_numeric($key)) {
-                if (is_array($value)) {
-                    $this->_buildXml($value, $element->addChild($key));
-                } else {
-                    $element->addChild($key, $value);
-                }
-            }
-        }
-
-        return $element;
-    }
-
-    /**
-     * @param array $data
-     * @return SimpleXMLElement
-     */
-    protected function _makeRequest(array $data)
-    {
-        /** @var Ak_NovaPoshta_Helper_Data $helper */
-        $helper    = Mage::helper('novaposhta');
-        $xmlString = $this->_buildXml($data)->asXML();
-
-        $helper->log('Request XML:' . $xmlString);
-
-        /** @var Zend_Http_Response $response */
-        $response = $this->_getHttpClient()
-            ->resetParameters(true)
-            ->setRawData($xmlString)
-            ->request(Zend_Http_Client::POST);
-
-        $helper->log('Response status code:' . $response->getStatus());
-        $helper->log('Response body:' . $response->getBody());
-
-        $helper->log(print_r((array) new SimpleXMLElement($response->getBody()), true));
-
-        if (200 != $response->getStatus()) {
-            Mage::throwException('Server error, response status:' . $response->getStatus());
-        }
-
-        return new SimpleXMLElement($response->getBody());
-    }
-
-    /**
-     * @return SimpleXMLElement
+     * @return array
      */
     public function getCityWarehouses()
     {
-        $responseXml = $this->_makeRequest(array(
-            'citywarehouses' => null,
-        ));
+        $response = $this->_getClient()->getCities();
+        $result = array();
+        if (isset($response['data']) && is_array($response['data'])) {
+            foreach ($response['data'] as $key => $city) {
+                $this->_cityMarshaling($city, $key);
+                $result[$city['ref']] = $city;
+            }
+        }
 
-        return $responseXml->xpath('result/cities/city');
+        return $result;
     }
 
     /**
-     * @return SimpleXMLElement
+     * @param array $cityData
+     * @param       $key
      */
-    public function getWarehouses()
+    public function _cityMarshaling(array &$cityData, $key)
     {
-        $responseXml = $this->_makeRequest(array(
-            'warenhouse' => null,
-        ));
+        $data = array();
+        $data['name_ru'] = $cityData['DescriptionRu'];
+        $data['name_ua'] = $cityData['Description'];
+        $data['ref']     = $cityData['Ref'];
+        $data['id']      = $cityData['CityID'];
 
-        return $responseXml->xpath('result/whs/warenhouse');
+        $cityData = $data;
     }
 
-    public function getShippingCost(
-        Zend_Date $deliveryDate,
-        Ak_NovaPoshta_Model_City $senderCity, Ak_NovaPoshta_Model_City $recipientCity,
-        $packageWeight, $packageLength, $packageWidth, $packageHeight, $publicPrice,
-        $deliveryType = self::DELIVERY_TYPE_WAREHOUSE_WAREHOUSE,
-        $loadType = self::LOAD_TYPE_STANDARD,
-        $floor = 0)
+    /**
+     * @param Varien_Object $cityInfo
+     * @return array
+     */
+    public function getWarehouses(Varien_Object $cityInfo)
     {
-        $response = $this->_makeRequest(array(
-            'countPrice' => array(
-                'date' => $deliveryDate->toString(Zend_Date::DATE_MEDIUM),
-                'senderCity' => $senderCity->getData('name_ru'),
-                'recipientCity' => $recipientCity->getData('name_ru'),
-                'mass' => $packageWeight,
-                'depth' => $packageLength,
-                'widht' => $packageWidth,
-                'height' => $packageHeight,
-                'publicPrice' => $publicPrice,
-                'deliveryType_id' => $deliveryType,
-                'loadType_id' => $loadType,
-                'floor_count' => $floor,
-            )
-        ));
-
-        if (1 == (int) $response->error) {
-            Mage::throwException('Novaposhta Api error');
+        $warehouses = array();
+        $response = $this->_getClient()->getWarehouses($cityInfo['ref']);
+        if (isset($response['data']) && is_array($response['data'])) {
+            foreach ($response['data'] as $key => $value) {
+                $this->_warehouseMarshaling($value, $key);
+                $value['city_id']          = $cityInfo['id'];
+                $warehouses[$value['ref']] = $value;
+            }
         }
 
-        return array (
-            'delivery_date' => (string) $response->date,
-            'cost' => (float) $response->cost,
+        return $warehouses;
+    }
+
+    /**
+     * @param array $warehouseData
+     * @param $key
+     */
+    public function _warehouseMarshaling(array &$warehouseData, $key)
+    {
+        $data = array();
+        $data['ref']      = $warehouseData['Ref'];
+        $data['address_ru'] = $warehouseData['DescriptionRu'];
+        $data['address_ua'] = $warehouseData['Description'];
+        $data['phone']     = $warehouseData['Phone'];
+        $data['longitude'] = $warehouseData['Longitude'];
+        $data['latitude'] = $warehouseData['Latitude'];
+        $data['max_weight_allowed'] = $warehouseData['TotalMaxWeightAllowed'];
+        $data['number_in_city'] = $warehouseData['Number'];
+
+        $warehouseData = $data;
+    }
+
+    /**
+     * @param Zend_Date                $deliveryDate
+     * @param Ak_NovaPoshta_Model_City $senderCity
+     * @param Ak_NovaPoshta_Model_City $recipientCity
+     * @param float                    $packageWeight
+     * @param float                    $publicPrice
+     * @param string                   $deliveryType
+     * @return array
+     * @throws Mage_Core_Exception
+     */
+    public function getShippingCost(
+        Zend_Date $deliveryDate, // Not implemented
+        Ak_NovaPoshta_Model_City $senderCity,
+        Ak_NovaPoshta_Model_City $recipientCity,
+        $packageWeight,
+        $publicPrice,
+        $deliveryType = self::DELIVERY_TYPE_WAREHOUSE_WAREHOUSE)
+    {
+        $response = $this->_getClient()->getDocumentPrice(
+            $senderCity->getData('ref'),
+            $recipientCity->getData('ref'),
+            $deliveryType,
+            $packageWeight,
+            $publicPrice
         );
+
+        if (!isset($response['success']) || $response['success'] != true) {
+            Mage::throwException('Novaposhta Api Error: ' . (empty($response['errors']) ? 'unknown' : implode('; ', (array) $response['errors'])));
+        }
+
+        return (float) $response['data'][0]["Cost"];
     }
 }

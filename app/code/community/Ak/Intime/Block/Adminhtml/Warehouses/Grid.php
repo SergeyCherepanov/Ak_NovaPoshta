@@ -1,5 +1,5 @@
 <?php
-class Ak_NovaPoshta_Block_Adminhtml_Warehouses_Grid extends Mage_Adminhtml_Block_Widget_Grid
+class Ak_Intime_Block_Adminhtml_Warehouses_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
     public function __construct()
     {
@@ -12,8 +12,8 @@ class Ak_NovaPoshta_Block_Adminhtml_Warehouses_Grid extends Mage_Adminhtml_Block
 
     protected function _prepareCollection()
     {
-        /** @var $collection Ak_NovaPoshta_Model_Resource_Warehouse_Collection */
-        $collection = Mage::getModel('novaposhta/warehouse')
+        /** @var $collection Intime_Model_Resource_Warehouse_Collection */
+        $collection = Mage::getModel('intime/warehouse')
             ->getCollection();
 
         $this->setCollection($collection);
@@ -39,7 +39,7 @@ class Ak_NovaPoshta_Block_Adminhtml_Warehouses_Grid extends Mage_Adminhtml_Block
         );
 
 
-        $options = Mage::getResourceModel('novaposhta/city_collection')->toOptionHash();
+        $options = Mage::getResourceModel('intime/city_collection')->toOptionHash();
 
         $this->addColumn('city_id',
             array(

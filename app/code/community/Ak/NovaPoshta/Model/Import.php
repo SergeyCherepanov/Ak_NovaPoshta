@@ -7,29 +7,13 @@ class Ak_NovaPoshta_Model_Import
     /** @var  array */
     protected $_existingWarehouses;
 
-    protected $_dataMapCity = array(
-        'id' => 'id',
-        'nameRu' => 'name_ru',
-        'nameUkr' => 'name_ua'
-    );
-
-    protected $_dataMapWarehouse = array(
-        'wareId' => 'id',
-        'city_id' => 'city_id',
-        'address' => 'address_ua',
-        'addressRu' => 'address_ru',
-        'phone' => 'phone',
-        'weekday_work_hours' => 'weekday_work_hours',
-        'weekday_reseiving_hours' => 'weekday_reseiving_hours',
-        'weekday_delivery_hours' => 'weekday_delivery_hours',
-        'saturday_work_hours' => 'saturday_work_hours',
-        'saturday_reseiving_hours' => 'saturday_reseiving_hours',
-        'saturday_delivery_hours' => 'saturday_delivery_hours',
-        'max_weight_allowed' => 'max_weight_allowed',
-        'x' => 'longitude',
-        'y' => 'latitude',
-        'number' => 'number_in_city'
-    );
+    /**
+     * @return Ak_NovaPoshta_Model_Api_Client
+     */
+    protected function _getApiClient()
+    {
+        return Mage::getSingleton('novaposhta/api_client');
+    }
 
     /**
      * @throws Exception
@@ -37,25 +21,14 @@ class Ak_NovaPoshta_Model_Import
      */
     public function run()
     {
-        $apiKey = Mage::helper('novaposhta')->getStoreConfig('api_key');
-        $apiUrl = Mage::helper('novaposhta')->getStoreConfig('api_url');
-        if (!$apiKey || !$apiUrl) {
-            Mage::helper('novaposhta')->log('No API key or API URL configured');
-            throw new Exception('No API key or API URL configured');
-        }
-
         try {
-            /** @var $apiClient Ak_NovaPoshta_Model_Api_Client */
-            $apiClient = Mage::getModel('novaposhta/api_client', array($apiUrl, $apiKey));
-
             Mage::helper('novaposhta')->log('Start city import');
-            $cities = $apiClient->getCityWarehouses();
+            $cities = $this->_getApiClient()->getCityWarehouses();
             $this->_importCities($cities);
             Mage::helper('novaposhta')->log('End city import');
 
             Mage::helper('novaposhta')->log('Start warehouse import');
-            $warehouses = $apiClient->getWarehouses();
-            $this->_importWarehouses($warehouses);
+            $this->_importWarehouses();
             Mage::helper('novaposhta')->log('End warehouse import');
         } catch (Exception $e) {
             Mage::logException($e);
@@ -81,13 +54,10 @@ class Ak_NovaPoshta_Model_Import
         $tableName  = Mage::getSingleton('core/resource')->getTableName('novaposhta_city');
         $connection = $this->_getConnection();
 
-        $cities = $this->_applyMap($cities, $this->_dataMapCity);
-
-        $existingCities = $this->_getExistingCities();
-        $citiesToDelete = array_diff(array_keys($existingCities), array_keys($cities));
+        $citiesToDelete = array_diff($this->_getExistingCities(), array_keys($cities));
 
         if (count($citiesToDelete) > 0) {
-            $connection->delete($tableName, $citiesToDelete);
+            $connection->delete($tableName, array('ref' => $citiesToDelete));
             Mage::helper('novaposhta')->log(sprintf("Warehouses deleted: %s", implode(',', $citiesToDelete)));
         }
 
@@ -117,7 +87,7 @@ class Ak_NovaPoshta_Model_Import
         if (!$this->_existingCities) {
             /** @var Ak_NovaPoshta_Model_Resource_City_Collection $collection */
             $collection = Mage::getResourceModel('novaposhta/city_collection');
-            $this->_existingCities = $collection->getAllIds();
+            $this->_existingCities = $collection->getColumnValues('ref');
         }
         return $this->_existingCities;
     }
@@ -140,29 +110,6 @@ class Ak_NovaPoshta_Model_Import
     }
 
     /**
-     * @param array $apiObjects
-     * @param array $map
-     * @return array
-     */
-    protected function _applyMap(array $apiObjects, array $map)
-    {
-        $resultingArray = array();
-        $idKey = array_search('id', $map);
-        foreach ($apiObjects as $apiObject) {
-            $id = (string) $apiObject->$idKey;
-            $resultingArray[$id] = array();
-            foreach ($apiObject as $apiKey => $value) {
-                if (!isset($map[$apiKey])) {
-                    continue;
-                }
-                $resultingArray[$id][$map[$apiKey]] = addcslashes((string)$value, "\000\n\r\\'\"\032");
-            }
-        }
-
-        return $resultingArray;
-    }
-
-    /**
      * @return Varien_Db_Adapter_Interface
      */
     protected function _getConnection()
@@ -171,53 +118,65 @@ class Ak_NovaPoshta_Model_Import
     }
 
     /**
-     * @param array $warehouses
+     * @param int|null $cityId
      * @return bool
      * @throws Exception
      */
-    protected function _importWarehouses(array $warehouses)
+    protected function _importWarehouses($cityId = null)
     {
-        if (empty($warehouses)) {
-            Mage::helper('novaposhta')->log('No warehouses received');
-            throw new Exception('No warehouses received');
+        $cities = Mage::getResourceModel('novaposhta/city_collection');
+        if ($cityId) {
+            $cities->addFieldToFilter('id', $cityId);
         }
-
-        $warehouses = $this->_applyMap($warehouses, $this->_dataMapWarehouse);
-        $existingWarehouses = $this->_getExistingWarehouses();
-        $warehousesToDelete = array_diff(array_keys($existingWarehouses), array_keys($warehouses));
-
-        $tableName  = Mage::getSingleton('core/resource')->getTableName('novaposhta_warehouse');
         $connection = $this->_getConnection();
-
-        if (count($warehousesToDelete) > 0) {
-            $connection->delete($tableName, $warehousesToDelete);
-            Mage::helper('novaposhta')->log(sprintf("Warehouses deleted: %s", implode(',', $warehousesToDelete)));
+        $tableName  = Mage::getSingleton('core/resource')->getTableName('novaposhta_warehouse');
+        $exists = $this->_getExistingWarehouses($cityId);
+        $newWarehouses = array();
+        
+        foreach ($cities as $cityInfo) {
+            $warehouses = $this->_getApiClient()->getWarehouses($cityInfo);
+            $newWarehouses = array_merge($newWarehouses, array_keys($warehouses));
+            $connection->beginTransaction();
+            try {
+                foreach ($warehouses as $data) {
+                    $connection->insertOnDuplicate($tableName, $data);
+                }
+                $connection->commit();
+            } catch (Exception $e) {
+                $connection->rollBack();
+                throw $e;
+            }
         }
 
-        $connection->beginTransaction();
-        try {
-            foreach ($warehouses as $data) {
-                $connection->insertOnDuplicate($tableName, $data);
+        $warehousesToDelete = array_diff($exists, $newWarehouses);
+        
+        if ($warehousesToDelete) {
+            $where = array(sprintf('ref IN (\'%s\')', implode('\',\'', $warehousesToDelete)));
+            if ($cityId) {
+                $where[] = sprintf('city_id = %d', $cityId);
             }
-            $connection->commit();
-        } catch (Exception $e) {
-            $connection->rollBack();
-            throw $e;
+            $connection->delete($tableName, implode(' AND ', $where));
+            Mage::helper('novaposhta')->log(sprintf("Warehouses deleted: %s", implode(',', $warehousesToDelete)));
         }
 
         return true;
     }
 
     /**
+     * @param null $cityId
      * @return array
      */
-    protected function _getExistingWarehouses()
+    protected function _getExistingWarehouses($cityId = null)
     {
         if (!$this->_existingWarehouses) {
             /** @var Ak_NovaPoshta_Model_Resource_Warehouse_Collection $collection */
             $collection = Mage::getResourceModel('novaposhta/warehouse_collection');
-            $this->_existingWarehouses = $collection->getAllIds();
+            if ($cityId) {
+                $collection->addFieldToFilter('city_id', $cityId);
+            }
+            $this->_existingWarehouses = $collection->getColumnValues('ref');
         }
+        
         return $this->_existingWarehouses;
     }
 }
